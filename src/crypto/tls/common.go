@@ -593,6 +593,10 @@ type Config struct {
 	// any verified chains that normal processing found. If it returns a
 	// non-nil error, the handshake is aborted and that error results.
 	//
+	// As a special case, if it returns a crypto/x509.CertificateInvalidError
+	// with Reason as x509.Revoked, the handshake will abort with alert code
+	// certificate_revoked. Otherwise, it aborts with bad_certificate.
+	//
 	// If normal verification fails then the handshake will abort before
 	// considering this callback. If normal verification is disabled by
 	// setting InsecureSkipVerify, or (for a server) when ClientAuth is

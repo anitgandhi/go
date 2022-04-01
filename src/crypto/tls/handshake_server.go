@@ -856,7 +856,14 @@ func (c *Conn) processCertsFromClient(certificate Certificate) error {
 
 	if c.config.VerifyPeerCertificate != nil {
 		if err := c.config.VerifyPeerCertificate(certificates, c.verifiedChains); err != nil {
-			c.sendAlert(alertBadCertificate)
+			var errCertificateInvalid x509.CertificateInvalidError
+			var alert alert
+			if errors.As(err, &errCertificateInvalid) && errCertificateInvalid.Reason == x509.Revoked {
+				alert = alertCertificateRevoked
+			} else {
+				alert = alertBadCertificate
+			}
+			c.sendAlert(alert)
 			return err
 		}
 	}
