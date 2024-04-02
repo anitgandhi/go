@@ -56,6 +56,10 @@ const (
 	// CANotAuthorizedForExtKeyUsage results when an intermediate or root
 	// certificate does not permit a requested extended key usage.
 	CANotAuthorizedForExtKeyUsage
+	// Revoked results when a certificate has been revoked.
+	// Note that the crypto/x509 package will never return an error with this reason;
+	// it is only meant for use with custom revocation implementations.
+	Revoked
 )
 
 // CertificateInvalidError results when an odd error occurs. Users of this
@@ -86,6 +90,8 @@ func (e CertificateInvalidError) Error() string {
 		return "x509: issuer has name constraints but leaf doesn't have a SAN extension"
 	case UnconstrainedName:
 		return "x509: issuer has name constraints but leaf contains unknown or unconstrained name: " + e.Detail
+	case Revoked:
+		return "x509: certificate has been revoked: " + e.Detail
 	}
 	return "x509: unknown error"
 }
