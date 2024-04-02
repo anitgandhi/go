@@ -1011,7 +1011,15 @@ func (c *Conn) verifyServerCertificate(certificates [][]byte) error {
 
 	if c.config.VerifyPeerCertificate != nil {
 		if err := c.config.VerifyPeerCertificate(certificates, c.verifiedChains); err != nil {
-			c.sendAlert(alertBadCertificate)
+			var errCertificateInvalid x509.CertificateInvalidError
+			if errors.As(err, &errCertificateInvalid) {
+				switch errCertificateInvalid.Reason {
+				case x509.Revoked:
+					c.sendAlert(alertCertificateRevoked)
+				}
+			} else {
+				c.sendAlert(alertBadCertificate)
+			}
 			return err
 		}
 	}
